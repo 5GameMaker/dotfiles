@@ -78,7 +78,7 @@ lsp.rust_analyzer.setup(s {
         }
     }
 })
-lsp.tsserver.setup(s {})
+lsp.ts_ls.setup(s {})
 lsp.zls.setup(s {})
 lsp.lua_ls.setup(s {})
 lsp.clangd.setup(s {})
