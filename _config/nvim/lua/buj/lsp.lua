@@ -87,6 +87,7 @@ lsp.glsl_analyzer.setup(s {})
 lsp.groovyls.setup(s {
     cmd = { "java", "-jar", "/usr/share/java/groovy-language-server/groovy-language-server-all.jar" },
 })
+require('sonarlint').setup(s {})
 
 local doAutoformat = true
 

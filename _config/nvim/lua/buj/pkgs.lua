@@ -25,6 +25,7 @@ require("lazy").setup({
     'nvim-lua/plenary.nvim',
     'mfussenegger/nvim-jdtls',
     'SergioRibera/cmp-dotenv',
+    'https://gitlab.com/schrieveslaach/sonarlint.nvim',
 
     -- GUI
     { 'akinsho/bufferline.nvim', commit = '2e3c8cc5a57ddd32f1edd2ffd2ccb10c09421f6c', dependencies = 'nvim-tree/nvim-web-devicons' },
