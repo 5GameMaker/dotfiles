@@ -140,11 +140,7 @@ vim.keymap.set('i', '<BS>', backspace, {
     noremap = true,
     replace_keycodes = false,
 })
-vim.keymap.set('i', '<s-BS>', '<BS>', {
-    expr = true,
-    noremap = true,
-    replace_keycodes = false,
-})
+vim.keymap.set('i', '<s-BS>', '<BS>')
 
 local highlight = {
     "RainbowRed",
