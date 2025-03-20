@@ -108,3 +108,11 @@ vim.keymap.set('n', '<leader>cx', function()
 end)
 
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+
+-- Backspace
+
+-- local function backspace()
+--
+-- end
+-- vim.keymap.set('i', '<S-BS>', '<BS>')
+--

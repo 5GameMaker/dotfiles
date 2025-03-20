@@ -12,6 +12,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+    -- Lib
+    'echasnovski/mini.nvim',
+
     -- LSP
     'neovim/nvim-lspconfig',
     'hrsh7th/cmp-nvim-lsp',
@@ -32,7 +35,13 @@ require("lazy").setup({
     { 'catppuccin/nvim',         name = 'catppuccin',                                 priority = 1000 },
     'nvim-tree/nvim-tree.lua',
     'mkropat/vim-ezguifont',
-    'm4xshen/autoclose.nvim',
+    -- '5GameMaker/autoclose.nvim', (using local version)
+    {
+        'windwp/nvim-autopairs',
+        event = "InsertEnter",
+    },
+    'windwp/nvim-ts-autotag',
+    'echasnovski/mini.move',
 
     -- Highlighting
     'nvim-treesitter/nvim-treesitter',
