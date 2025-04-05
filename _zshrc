@@ -19,7 +19,7 @@ zsh_plug zsh-users zsh-autosuggestions
 zsh_plug tamcore autoupdate-oh-my-zsh-plugins autoupdate
 
 plugins=(autoupdate zsh-vi-mode zsh-autosuggestions zsh-syntax-highlighting)
-UPDATE_ZSH_DAYS=1
+UPDATE_ZSH_DAYS=30
 ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
 source $ZSH/oh-my-zsh.sh
