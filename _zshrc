@@ -25,13 +25,31 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 source $ZSH/oh-my-zsh.sh
 eval "$(starship init zsh)"
 
+MPV_FLAGS="--no-audio-display"
+
+if [[ "$TERM" == "xterm-kitty" ]]; then
+    MPV_FLAGS="$MPV_FLAGS --vo=kitty --profile=sw-fast --vo-kitty-use-shm=yes"
+fi
+
+export MPV_FLAGS
+
 alias ls='eza -h --sort Name'
 alias tree='eza -hT --sort Name'
+alias lsq='eza -h'
+alias treeq='eza -hT'
 alias cd='pushd &> /dev/null'
 alias cdp='__tempfn() { cd ~/Projects/$1 }; __tempfn'
 alias pkg='sudo -iupkgbuild paru'
 alias pkgs='paru -Ss'
 alias neofetch=fastfetch
+alias mpv="mpv $MPV_FLAGS"
+
+if test -n "$KITTY_INSTALLATION_DIR"; then
+    export KITTY_SHELL_INTEGRATION="enabled"
+    autoload -Uz -- "$KITTY_INSTALLATION_DIR"/shell-integration/zsh/kitty-integration
+    kitty-integration
+    unfunction kitty-integration
+fi
 
 sys() {
     case "$1" in
@@ -40,7 +58,7 @@ sys() {
             echo "Performing full system upgrade!"
             upgrade_oh_my_zsh_custom
             omz update
-            pkg
+            pkg -y
             echo "Done! (You should reboot to avoid funny issues)."
             ;;
         *) echo "Unknown subcommand"; return 1;;
