@@ -14,6 +14,11 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     -- Lib
     'echasnovski/mini.nvim',
+    {
+        "b1nhack/nvim-json5",
+        build = "./install.sh",
+        lazy = false,
+    },
 
     -- LSP
     'neovim/nvim-lspconfig',
@@ -30,18 +35,28 @@ require("lazy").setup({
     'SergioRibera/cmp-dotenv',
     'https://gitlab.com/schrieveslaach/sonarlint.nvim',
 
+    -- Dap
+    'mfussenegger/nvim-dap',
+    'nvim-neotest/nvim-nio',
+    'rcarriga/nvim-dap-ui',
+    'nicholasmata/nvim-dap-cs',
+
     -- GUI
     { 'akinsho/bufferline.nvim', commit = '2e3c8cc5a57ddd32f1edd2ffd2ccb10c09421f6c', dependencies = 'nvim-tree/nvim-web-devicons' },
     { 'catppuccin/nvim',         name = 'catppuccin',                                 priority = 1000 },
     'nvim-tree/nvim-tree.lua',
     'mkropat/vim-ezguifont',
-    -- '5GameMaker/autoclose.nvim', (using local version)
+    '3rd/image.nvim',
+    'rcarriga/nvim-notify',
+
     {
         'windwp/nvim-autopairs',
         event = "InsertEnter",
     },
     'windwp/nvim-ts-autotag',
     'echasnovski/mini.move',
+    'kosayoda/nvim-lightbulb',
+    'folke/which-key.nvim',
 
     -- Highlighting
     'nvim-treesitter/nvim-treesitter',

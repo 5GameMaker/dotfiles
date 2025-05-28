@@ -1,5 +1,12 @@
 #!/usr/bin/env sh
 
+set -e
+
+check=false
+if [ "$1" == "check" ]; then
+    check=true
+fi
+
 ignore=(./update.sh ./install.sh ./README.md ./.gitignore ./.git ./local ./ATTRIBUTION)
 
 _walk() {
@@ -16,14 +23,33 @@ _walk() {
         DST="$HOME/${PREFIX#./}"
         DSTP="$(dirname "$DST")"
 
-        if [ ! -d "$DSTP" ]; then mkdir -vp "$DSTP"; fi
-        cp -pv "$SRC" "$DST"
-        if [ -f "$SUP" ]; then
-            if grep -q -F "+ #- inject -#" "$DST"; then
-                echo "todo!"
+        if $check; then
+            if [ -f "$SUP" ]; then
+                diff="$(cat ${SRC} ${SUP} | diff - ${DST} --normal --color=always 2>&1 | tee)"
+                if [ ! -z "$diff" ]; then
+                    echo "${SRC} != ${DST}!"
+                    printf "%s\n" ${diff}
+                fi
             else
-                echo "'$SUP' >> '$DST'"
-                cat "$SUP" >> "$DST"
+                diff="$(diff ${SRC} ${DST} --normal --color=always 2>&1 | tee)"
+                if [ ! -z "$diff" ]; then
+                    echo "${SRC} != ${DST}!"
+                    printf "%s\n" ${diff}
+                fi
+            fi
+        else
+            echo "unreachable!"
+            exit 1
+            if [ ! -d "$DSTP" ]; then mkdir -vp "$DSTP"; fi
+            cp -pv "$SRC" "$DST"
+            if [ -f "$SUP" ]; then
+                if grep -q -F "+ #- inject -#" "$DST"; then
+                    echo "todo!"
+                    exit 1
+                else
+                    echo "'$SUP' >> '$DST'"
+                    cat "$SUP" >> "$DST"
+                fi
             fi
         fi
     fi

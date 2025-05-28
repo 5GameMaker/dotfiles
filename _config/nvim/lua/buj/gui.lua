@@ -1,3 +1,5 @@
+vim.notify = require('notify')
+
 require('bufferline').setup {}
 require('nvim-tree').setup {
     sort = {
@@ -14,52 +16,24 @@ require('nvim-tree').setup {
     },
 }
 vim.cmd.colorscheme 'catppuccin-mocha'
--- local autoclose = require("inlined.autoclose")
--- autoclose.setup {
---     keys = {
---         ["("] = { escape = false, close = true, pair = "()" },
---         ["["] = { escape = false, close = true, pair = "[]" },
---         ["{"] = { escape = false, close = true, pair = "{}" },
---
---         [")"] = { escape = true, close = false, pair = "()" },
---         ["]"] = { escape = true, close = false, pair = "[]" },
---         ["}"] = { escape = true, close = false, pair = "{}" },
---
---         ['"'] = { escape = true, close = true, pair = '""' },
---         ["'"] = { escape = true, close = true, pair = "''", disabled_filetypes = { "rust" } },
---         ["`"] = { escape = true, close = true, pair = "``" },
---
---         [" "] = { escape = false, close = true, pair = "  " },
---
---         ["<BS>"] = {},
---         ["<C-H>"] = {},
---         ["<C-W>"] = {},
---         ["<CR>"] = { disable_command_mode = true },
---         ["<S-CR>"] = { disable_command_mode = true },
---     },
---     options = {
---         disabled_filetypes = { "text" },
---         disable_when_touch = false,
---         touch_regex = "[%w(%[{]",
---         pair_spaces = false,
---         auto_indent = true,
---         disable_command_mode = true,
---     },
---     remap = false,
---     disabled = false,
--- }
--- for _, key in ipairs({ "(", ")", "[", "]", "{", "}", '"', "'", "`", " ", "<CR>", "<S-CR>" }) do
---     autoclose.bind(key)
--- end
+vim.diagnostic.config({
+    signs = {
+        active = {
+            { name = "DiagnosticSignError", text = "" },
+            { name = "DiagnosticSignWarn", text = "" },
+            { name = "DiagnosticSignInfo", text = "" },
+            { name = "DiagnosticSignHint", text = "" },
+        },
+    },
+})
+vim.fn.sign_define('DapBreakpoint', { text = '•', texthl = 'yellow', linehl = '', numhl = '' })
 require('mini.move').setup {
     mappings = {
-        -- Move visual selection in Visual mode.
-        left = '<M-up>',
+        left = '<M-left>',
         right = '<M-right>',
         down = '<M-down>',
         up = '<M-up>',
 
-        -- Move current line in Normal mode.
         line_left = '<M-left>',
         line_right = '<M-right>',
         line_down = '<M-down>',
@@ -68,13 +42,11 @@ require('mini.move').setup {
 }
 require('mini.move').setup {
     mappings = {
-        -- Move visual selection in Visual mode.
         left = '<M-h>',
         right = '<M-l>',
         down = '<M-j>',
         up = '<M-k>',
 
-        -- Move current line in Normal mode
         line_left = '<M-h>',
         line_right = '<M-l>',
         line_down = '<M-j>',
@@ -87,53 +59,65 @@ autopairs.setup {
     map_bs = false,
     enable_check_bracket_line = true,
 }
-vim.cmd [[set backspace=indent,eol,start]]
-local escape_code = vim.api.nvim_replace_termcodes(
-    "<Esc>",
-    false, false, true
-)
-local backspace_code = vim.api.nvim_replace_termcodes(
-    "<BS>",
-    false, false, true
-)
-local function viml_backspace()
-    -- expression from a deleted reddit user
-    vim.cmd([[
-        let g:exprvalue =
-        \ (&indentexpr isnot '' ? &indentkeys : &cinkeys) =~? '!\^F' &&
-        \ &backspace =~? '.*eol\&.*start\&.*indent\&' &&
-        \ !search('\S','nbW',line('.')) ? (col('.') != 1 ? "\<C-U>" : "") .
-        \ "\<bs>" . (getline(line('.')-1) =~ '\S' ? "" : "\<C-F>") : "\<bs>"
-        ]])
-    return vim.g.exprvalue
-end
 local function backspace()
     local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-    local before_cursor_is_whitespace = vim.api.nvim_get_current_line()
-        :sub(0, col)
-        :match("^%s*$")
 
-    if not before_cursor_is_whitespace then
-        -- return vim.api.nvim_replace_termcodes(autoclose.pressed("<BS>", 'insert'), true, false, true)
+    local current_line = vim.api.nvim_get_current_line()
+    local whitespace_len = 1
+    while whitespace_len <= col do
+        local s = current_line:sub(col - whitespace_len + 1, col)
+        if s:match("^%s*$") then
+            whitespace_len = whitespace_len + 1
+        else
+            break
+        end
+    end
+    whitespace_len = whitespace_len - 1
+
+    if whitespace_len > 0 or col == 0 then
+        local back = ""
+        if line ~= 1 and ((current_line:sub(0, col):match("^%s*$") and not current_line:match("^%s*$")) or current_line:match("^%s*$")) then
+            local previous_line = vim.api.nvim_buf_get_lines(0, line - 2, line - 1, true)[1]
+            local prev_line_col = #previous_line
+            local prev_ws_len = 1
+            while prev_ws_len <= #previous_line do
+                local s = previous_line:sub(#previous_line - prev_ws_len + 1)
+                if s:match("^%s*$") then
+                    prev_ws_len = prev_ws_len + 1
+                else
+                    break
+                end
+            end
+            prev_ws_len = prev_ws_len - 1
+            local spc = (" "):rep(whitespace_len)
+            local rem = ""
+            if previous_line:match("^%s*$") then
+                if prev_line_col ~= 0 then
+                    rem = "<Left><C-o>v0\"_d"
+                end
+            elseif prev_ws_len == 0 then
+                spc = " "
+            elseif prev_ws_len == 1 then
+                spc = ""
+            elseif prev_ws_len > 1 then
+                spc = " "
+                rem = "<Left><C-o>v" .. (prev_ws_len - 1) .. "h\"_d"
+            end
+            back = "<S-BS>" .. rem .. spc
+        end
+        local rem = ""
+        if whitespace_len > 1 then
+            if #back == 0 then
+                back = " "
+            end
+            rem = "<Left><C-o>v" .. (whitespace_len - 1) .. "h\"_d"
+        elseif whitespace_len == 1 then
+            rem = "<S-BS>"
+        end
+        return vim.api.nvim_replace_termcodes(rem .. back, true, false, true)
+    else
         return autopairs.autopairs_bs()
     end
-    if line == 1 then
-        return viml_backspace()
-    end
-    local correct_indent = require("nvim-treesitter.indent").get_indent(line)
-    local current_indent = vim.fn.indent(line)
-    local previous_line_is_whitespace = vim.api.nvim_buf_get_lines(
-        0, line - 2, line - 1, false
-    )[1]:match("^%s*$")
-    if current_indent == correct_indent then
-        if previous_line_is_whitespace then
-            return viml_backspace()
-        end
-        return backspace_code
-    elseif current_indent > correct_indent then
-        return escape_code .. "==0wi"
-    end
-    return backspace_code
 end
 vim.keymap.set('i', '<BS>', backspace, {
     expr = true,
@@ -153,8 +137,6 @@ local highlight = {
 }
 
 local hooks = require "ibl.hooks"
--- create the highlight groups in the highlight setup hook, so they are reset
--- every time the colorscheme changes
 hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
     vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
     vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
@@ -181,3 +163,84 @@ require("ibl").setup {
 require('rainbow-delimiters.setup').setup {
     highlight = highlight,
 }
+
+require('image').setup {
+    backend = 'kitty',
+    processor = 'magick_cli',
+    hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif" },
+    integrations = {
+        markdown = {
+            enabled = true,
+            clear_in_insert_mode = false,
+            download_remote_images = true,
+            only_render_image_at_cursor = false,
+            only_render_image_at_cursor_mode = "popup",
+            floating_windows = false,
+            filetypes = { "markdown", "vimwiki" },
+            resolve_image_path = function(document_path, image_path, fallback)
+                local path = vim.fs.dirname(document_path) .. "/" .. image_path
+                if vim.uv.fs_stat(path) then
+                    return path
+                end
+                path = vim.fs.dirname(vim.fn.getcwd()) .. "/" .. image_path
+                if vim.uv.fs_stat(path) then
+                    return path
+                end
+                return fallback(document_path, image_path)
+            end
+        },
+        neorg = {
+            enabled = true,
+            filetypes = { "norg" },
+        },
+        typst = {
+            enabled = true,
+            filetypes = { "typst" },
+        },
+        html = {
+            enabled = true,
+        },
+        css = {
+            enabled = true,
+        },
+    },
+}
+
+-- require("image").setup({
+--     backend = "kitty",
+--     processor = "magick_cli", -- or "magick_rock"
+--     integrations = {
+--         markdown = {
+--             enabled = true,
+--             clear_in_insert_mode = false,
+--             download_remote_images = true,
+--             only_render_image_at_cursor = false,
+--             only_render_image_at_cursor_mode = "popup",
+--             floating_windows = false,
+--             filetypes = { "markdown", "vimwiki" },
+--         },
+--         neorg = {
+--             enabled = true,
+--             filetypes = { "norg" },
+--         },
+--         typst = {
+--             enabled = true,
+--             filetypes = { "typst" },
+--         },
+--         html = {
+--             enabled = true,
+--         },
+--         css = {
+--             enabled = true,
+--         },
+--     },
+--     max_width = nil,
+--     max_height = nil,
+--     max_width_window_percentage = nil,
+--     max_height_window_percentage = 50,
+--     window_overlap_clear_enabled = false,
+--     window_overlap_clear_ft_ignore = { "cmp_menu", "cmp_docs", "snacks_notif", "scrollview", "scrollview_sign" },
+--     editor_only_render_when_focused = false,
+--     tmux_show_only_in_active_window = false,
+--     hijack_file_patterns = { "*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.avif" },
+-- })

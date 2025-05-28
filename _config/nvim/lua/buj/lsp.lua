@@ -1,5 +1,20 @@
 local lsp = require('lspconfig')
 local cmp = require('cmp')
+local lslib = require('buj.lib.lsp')
+
+local s = lslib.s
+
+local lsp_configs = require('lspconfig.configs')
+if not lsp_configs.avalonia then
+    local root_pattern = require("lspconfig.util").root_pattern
+    lsp_configs.avalonia = {
+        default_config = {
+            cmd = { "dotnet", "/usr/lib/avalonia-ls/avalonia-preview/AvaloniaLanguageServer.dll" },
+            root_dir = root_pattern("*.csproj"),
+            filetypes = { "axaml", "xml" },
+        },
+    }
+end
 
 cmp.setup({
     snippet = {
@@ -49,19 +64,6 @@ cmp.setup.cmdline(':', {
     matching = { disallow_symbol_nonprefix_matching = false }
 })
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-local function update_config(_new_config, new_root_path)
-    if new_root_path ~= nil then ROOT_PATH = new_root_path end
-end
-
-local function s(table)
-    table.single_file_support = true
-    table.capabilities = capabilities
-    table.on_new_config = update_config
-    return table
-end
-
 lsp.rust_analyzer.setup(s {
     settings = {
         ['rust-analyzer'] = {
@@ -72,11 +74,12 @@ lsp.rust_analyzer.setup(s {
             inlineHints = {
                 enable = true,
             },
-            checkOnSave = {
-                command = "clippy",
-            },
+            checkOnSave = true,
         }
-    }
+    },
+    on_init = function(client, _)
+        lslib.set_command(client.id, "cargo run")
+    end
 })
 lsp.ts_ls.setup(s {})
 lsp.zls.setup(s {})
@@ -87,13 +90,22 @@ lsp.glsl_analyzer.setup(s {})
 lsp.groovyls.setup(s {
     cmd = { "java", "-jar", "/usr/share/java/groovy-language-server/groovy-language-server-all.jar" },
 })
+lsp.omnisharp.setup(s {
+    cmd = { "/usr/bin/omnisharp", "--languageserver" }
+})
+lsp.avalonia.setup(s {
+    on_new_config = function(_, root)
+        print("New path! " .. root)
+        vim.system({ "avalonia-solution-parser", root })
+    end
+})
 require('sonarlint').setup(s {})
 
 local doAutoformat = true
 
 vim.api.nvim_create_user_command(
     'AutoFormat',
-    function(opts)
+    function(_)
         doAutoformat = true
         print("Enabled auto-formatting")
     end,
@@ -102,7 +114,7 @@ vim.api.nvim_create_user_command(
 
 vim.api.nvim_create_user_command(
     'NoAutoFormat',
-    function(opts)
+    function(_)
         doAutoformat = false
         print("Disabled auto-formatting")
     end,
@@ -128,3 +140,19 @@ vim.api.nvim_create_autocmd("BufWritePre", {
         if doAutoformat then vim.lsp.buf.format { async = false } end
     end
 })
+
+vim.api.nvim_create_user_command(
+    'DebugBufferShowLsps',
+    function(_)
+        local bufid = vim.api.nvim_get_current_buf()
+        for _, value in pairs(vim.lsp.get_clients({ bufid = bufid })) do
+            if value.attached_buffers[bufid] ~= true then
+                goto continue
+            end
+            print(value.name .. "(id=" .. value.id .. ")")
+
+            ::continue::
+        end
+    end,
+    { nargs = 0 }
+)

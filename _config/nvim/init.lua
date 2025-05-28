@@ -7,4 +7,6 @@ require("buj.gui")
 require("buj.ts")
 require("buj.git")
 require("buj.tools")
+require("buj.dap")
+
 if vim.g.neovide then require("buj.neovide") end
