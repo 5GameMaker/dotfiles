@@ -33,7 +33,6 @@ fi
 
 export MPV_FLAGS
 
-alias sudo='sudo -A'
 alias ls='eza -h --sort Name'
 alias tree='eza -hT --sort Name'
 alias lsq='eza -h'
