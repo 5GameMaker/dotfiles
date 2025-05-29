@@ -87,6 +87,7 @@ lsp.lua_ls.setup(s {})
 lsp.clangd.setup(s {})
 lsp.kotlin_language_server.setup(s {})
 lsp.glsl_analyzer.setup(s {})
+lsp.marksman.setup(s {})
 lsp.groovyls.setup(s {
     cmd = { "java", "-jar", "/usr/share/java/groovy-language-server/groovy-language-server-all.jar" },
 })

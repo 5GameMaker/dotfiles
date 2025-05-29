@@ -38,8 +38,6 @@ _walk() {
                 fi
             fi
         else
-            echo "unreachable!"
-            exit 1
             if [ ! -d "$DSTP" ]; then mkdir -vp "$DSTP"; fi
             cp -pv "$SRC" "$DST"
             if [ -f "$SUP" ]; then

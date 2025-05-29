@@ -46,7 +46,7 @@ require("lazy").setup({
     { 'catppuccin/nvim',         name = 'catppuccin',                                 priority = 1000 },
     'nvim-tree/nvim-tree.lua',
     'mkropat/vim-ezguifont',
-    '3rd/image.nvim',
+    --'3rd/image.nvim',
     'rcarriga/nvim-notify',
 
     {
