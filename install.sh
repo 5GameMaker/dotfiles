@@ -5,7 +5,8 @@ sudo pacman -Syy kitty zsh starship hyprland rustup git curl wget \
                  hyprpolkitagent lua-language-server \
                  typescript-language-server jdk{,21,8}-openjdk marksman \
                  pipewire pipewire-pulse pipewire-jack wireplumber \
-                 xdg-desktop-portal-{hyprland,kde} xorg-xwayland
+                 xdg-desktop-portal-{hyprland,kde} xorg-xwayland \
+                 noto-fonts{,-{cjk,extra,emoji}}
 
 chsh -s /usr/bin/zsh
 git clone https://github.com/ohmyzsh/ohmyzsh/ ~/.oh-my-zsh

@@ -53,3 +53,6 @@ _walk() {
     fi
 }
 _walk
+
+gsettings set org.gnome.desktop.interface gtk-theme Catppuccin-Mocha-Mauve
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
